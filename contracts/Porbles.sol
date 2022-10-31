@@ -28,14 +28,13 @@ contract Porbles is ERC721URIStorage, ERC2981, Ownable {
         _resetTokenRoyalty(tokenId);
     }
 
-    function burnNFT(uint256 tokenId)
-        public onlyOwner
+    function burnNFT(uint256 tokenId) public onlyOwner
     {
         _burn(tokenId);
     }
 
     function mintNFT(address recipient, string memory tokenURI) 
-        public onlwOwner
+        public onlyOwner
         returns (uint256)
     {
         _tokenIds.increment();
@@ -47,7 +46,7 @@ contract Porbles is ERC721URIStorage, ERC2981, Ownable {
         return newItemId;
     }
 
-    function mintNFTWithRoyalty(address recipient, string memory tokenURI, address royaltyReceiver, u96 feeNumerator)
+    function mintNFTWithRoyalty(address recipient, string memory tokenURI, address royaltyReceiver, uint96 feeNumerator)
         public onlyOwner
         returns (uint256)
     {
