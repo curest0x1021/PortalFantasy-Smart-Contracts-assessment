@@ -80,8 +80,10 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         delete (listings[NFTAddress][tokenId]);
     }
 
+    // NFT Reentrant attack: attacker may call this more than once using NFT->onReceived callback
     function buyItem(address NFTAddress, uint256 tokenId)
         external
+        nonReentrant()
         isListed(NFTAddress, tokenId)
     {
         Listing memory listedItem = listings[NFTAddress][tokenId];
