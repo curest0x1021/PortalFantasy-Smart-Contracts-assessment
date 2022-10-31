@@ -105,12 +105,19 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     {
         Listing memory listedItem = listings[NFTAddress][tokenId];
 
-        uint256 amountPaidToSeller = listedItem.price;
+        (address receiver, uint256 royaltyAmount) = IERC2981(NFTAddress).royaltyInfo(tokenId, listedItem.price);
+        uint256 remaining = listedItem.price - royaltyAmount;
+
 
         IERC20(tokenToPay).transferFrom(
             msg.sender,
             listedItem.seller,
-            amountPaidToSeller
+            remaining
+        );
+        IERC20(tokenToPay).transferFrom(
+            msg.sender,
+            receiver,
+            royaltyAmount
         );
         delete (listings[NFTAddress][tokenId]);
         IERC721(NFTAddress).safeTransferFrom(
