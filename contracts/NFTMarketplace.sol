@@ -17,21 +17,24 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
 
     // Events
     event ItemListed(
+        uint256 indexed tokenId,
+        address indexed seller,
         address NFTAddress,
-        uint256 tokenId,
-        uint256 price,
-        address seller
+        uint256 price
     );
 
     event ItemCancelled(
-        address NFTAddress,
-        uint256 tokenId
+        uint256 indexed tokenId,
+        address indexed seller,
+        address NFTAddress
     );
 
     event ItemBought(
-        address NFTAddress, 
-        uint256 tokenId,
-        address purchaser
+        uint256 indexed tokenId,
+        address indexed buyer,
+        address indexed seller,
+        address NFTAddress,
+        uint256 price 
     );
 
     // Modifiers
@@ -82,7 +85,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             "Not approved for marketplace"
         );
         listings[NFTAddress][tokenId] = Listing(price, msg.sender);
-        emit ItemListed(NFTAddress, tokenId, price, msg.sender);
+        emit ItemListed(tokenId, msg.sender, NFTAddress, price);
     }
 
     function cancelListing(address NFTAddress, uint256 tokenId)
@@ -91,7 +94,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         isListed(NFTAddress, tokenId)
     {
         delete (listings[NFTAddress][tokenId]);
-        emit ItemCancelled(NFTAddress, tokenId);
+        emit ItemCancelled(tokenId, msg.sender, NFTAddress);
     }
 
     // NFT Reentrant attack: attacker may call this more than once using NFT->onReceived callback
@@ -115,7 +118,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             msg.sender,
             tokenId
         );
-        emit ItemBought(NFTAddress, tokenId, msg.sender);
+        emit ItemBought(tokenId, msg.sender, listedItem.seller, NFTAddress, listedItem.price);
     }
 
     function updateListing(
@@ -129,7 +132,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     {
         require(newPrice > 0, "Price must be above zero");
         listings[NFTAddress][tokenId].price = newPrice;
-        emit ItemListed(NFTAddress, tokenId, newPrice, msg.sender);
+        emit ItemListed(tokenId, msg.sender, NFTAddress, newPrice);
     }
 
     function getListing(address NFTAddress, uint256 tokenId)
