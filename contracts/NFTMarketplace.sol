@@ -27,15 +27,24 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         address NFTAddress,
         uint256 tokenId,
         address owner
-    ) {}
+    ) {
+        require(listings[NFTAddress][tokenId].price == 0, "Market: Already listed");
+        _;
+    }
 
     modifier isNFTOwner(
         address NFTAddress,
         uint256 tokenId,
         address spender
-    ) {}
+    ) {
+        require(IERC721(NFTAddress).ownerOf(tokenId) == spender, "Market: Not the owner");
+        _;
+    }
 
-    modifier isListed(address NFTAddress, uint256 tokenId) {}
+    modifier isListed(address NFTAddress, uint256 tokenId) {
+        require(listings[NFTAddress][tokenId].price > 0, "Market: Not listed");
+        _;
+    }
 
     // An ERC-20 token that is accepted as payment in the marketplace (e.g. WAVAX)
     address tokenToPay;
