@@ -16,11 +16,23 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     }
 
     // Events
-    event ItemListed();
+    event ItemListed(
+        address NFTAddress,
+        uint256 tokenId,
+        uint256 price,
+        address seller
+    );
 
-    event ItemCancelled();
+    event ItemCancelled(
+        address NFTAddress,
+        uint256 tokenId
+    );
 
-    event ItemBought();
+    event ItemBought(
+        address NFTAddress, 
+        uint256 tokenId,
+        address purchaser
+    );
 
     // Modifiers
     modifier notListed(
@@ -70,6 +82,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             "Not approved for marketplace"
         );
         listings[NFTAddress][tokenId] = Listing(price, msg.sender);
+        emit ItemListed(NFTAddress, tokenId, price, msg.sender);
     }
 
     function cancelListing(address NFTAddress, uint256 tokenId)
@@ -78,6 +91,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
         isListed(NFTAddress, tokenId)
     {
         delete (listings[NFTAddress][tokenId]);
+        emit ItemCancelled(NFTAddress, tokenId);
     }
 
     // NFT Reentrant attack: attacker may call this more than once using NFT->onReceived callback
@@ -101,6 +115,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
             msg.sender,
             tokenId
         );
+        emit ItemBought(NFTAddress, tokenId, msg.sender);
     }
 
     function updateListing(
@@ -114,6 +129,7 @@ contract NFTMarketplace is ReentrancyGuard, Ownable {
     {
         require(newPrice > 0, "Price must be above zero");
         listings[NFTAddress][tokenId].price = newPrice;
+        emit ItemListed(NFTAddress, tokenId, newPrice, msg.sender);
     }
 
     function getListing(address NFTAddress, uint256 tokenId)
